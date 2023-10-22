@@ -2,11 +2,32 @@ State = "S1"
 Heater = ""
 Cooler = ""
 CRS = 0
+Heat = 0
 
 def wait_for_event():
     pass 
 
-def super_state(CRS) : 
+def super_state_hot(Heat) : 
+    super_state_state = "S1"
+    while super_state_state != "OUT" : 
+        Next_State = super_state_state
+        if super_state_state == "S1":
+            Heat = 1
+            event = wait_for_event()
+            if event == "T<5":
+                Next_State = "S2"
+            elif event =="T>30":
+                Next_State = "OUT"
+        elif super_state_state == "S2":
+            Heat = 2
+            event = wait_for_event()
+            if event == "T>10":
+                Next_State = "S1"
+        
+        super_state_state = Next_State
+    Heat = 0
+
+def super_state_cold(CRS) : 
     super_state_state = "S1"
     while super_state_state != "OUT" : 
         Next_State = super_state_state
@@ -47,14 +68,13 @@ while True :
     elif State == "S2" :
         Heater = "OFF"
         Cooler = "ON"
-        super_state(CRS)
+        super_state_cold(CRS)
         Next_State = "S1"
     
     elif State == "S3" :
         Heater = "ON"
         Cooler = "OFF"
-        event = wait_for_event()
-        if event == "T>30":
-            Next_State = "S1"
+        super_state_hot(Heat)
+        Next_State = "S1"
     State = Next_State
     
